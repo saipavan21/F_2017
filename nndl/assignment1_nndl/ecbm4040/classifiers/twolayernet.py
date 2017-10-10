@@ -106,9 +106,13 @@ class TwoLayerNet(object):
         #    self.velocity[k] = (self.momentum * self.velocity[k]) - learning_rate * grads[k]
         #    params[k] += self.velocity[k]
 
+        #for k in range(len(params)):
+        #    self.velocity[k] = (self.momentum * self.velocity[k]) + learning_rate * grads[k]
+        #    params[k] -= self.velocity[k]
         #self.velocity = (self.momentum * self.velocity) - learning_rate * grads
         #params += self.velocity
 
+        
         self.adam_count += 1
         for k in range(len(params)):
             self.adam_m[k] = (self.adam_beta1 * self.adam_m[k]) + (1-self.adam_beta1) * grads[k]
@@ -120,7 +124,7 @@ class TwoLayerNet(object):
             #temp = (self.adam_alpha* m_k_hat)/(np.sqrt(r_k_hat) + self.adam_eps)
             #print(r_k_hat)
             params[k] -= (self.adam_alpha* m_k_hat)/(np.sqrt(r_k_hat) + self.adam_eps)
-
+        
         #self.adam_m = (self.adam_beta1 * self.adam_m) + (1-self.adam_beta1) * grads
         #self.adam_r = (self.adam_beta2 * self.adam_r) + (1-self.adam_beta2) * grads * grads
         #m_k_hat = self.adam_m/(1-self.adam_beta1**iterat)

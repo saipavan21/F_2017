@@ -43,6 +43,7 @@ class DenseLayer(FullyConnectedLayer):
         self.output_dim = output_dim
         
         W = weight_scale*np.random.rand(input_dim, output_dim)
+        #W = np.sqrt(2/input_dim) * np.random.randn(input_dim, output_dim)
         b = np.zeros(output_dim)
         self.params = [W, b]
     
@@ -120,6 +121,7 @@ class AffineLayer(FullyConnectedLayer):
         self.output_dim = output_dim
         
         W = weight_scale*np.random.rand(input_dim, output_dim)
+        #W = np.sqrt(2/input_dim) * np.random.randn(input_dim, output_dim)
         b = np.zeros(output_dim)
         self.params = [W, b]
     

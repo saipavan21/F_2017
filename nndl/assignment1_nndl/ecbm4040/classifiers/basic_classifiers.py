@@ -79,7 +79,7 @@ class BasicClassifier(object):
 
                 num_completed += batch_size
 
-                loss_history.append(loss)
+            loss_history.append(loss)
             
             #########################################################################
             # TODO:                                                                 #

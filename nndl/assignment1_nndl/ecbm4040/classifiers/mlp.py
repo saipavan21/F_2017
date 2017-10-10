@@ -31,6 +31,20 @@ class MLP(object):
         layers.append(AffineLayer(input_dim=dims[-1], output_dim=num_classes, weight_scale=weight_scale))
         
         self.layers = layers
+        self.momentum = 0.5
+
+        self.velocity = []
+        for i in range(len(self.layers)):
+            for j in range(len(self.layers[i].params)):
+                self.velocity.append(np.zeros_like(self.layers[i].params[j]))
+            
+        self.adam_m = self.velocity
+        self.adam_r = self.velocity
+        self.adam_count = 0
+        self.adam_beta1 = 0.9
+        self.adam_beta2 = 0.999
+        self.adam_alpha = 0.001
+        self.adam_eps = 1e-8
 
     def loss(self, X, y):
         """
@@ -51,16 +65,31 @@ class MLP(object):
         #TODO: Feedforward                                #
         ###################################################
 
-        
+        layer_input = X
+        for layer in self.layers:
+            layer_ouput = layer.feedforward(layer_input)
+            layer_input = layer_ouput
+
+        loss, layer_dinput = softmax_loss(layer_input, y)
+
+
         ###################################################
         #TODO: Backpropogation                            #
         ###################################################
         
+        for rev_layer in list(reversed(self.layers)):
+            rev_layer_output = rev_layer.backward(layer_dinput)
+            layer_dinput = rev_layer_output
+
         
         ###################################################
         # TODO: Add L2 regularization                     #
         ###################################################
-        
+        square_weights = 0.0
+        for layer in self.layers:
+            square_weights += np.sum(layer.params[0]**2)
+
+        loss += 0.5 * self.reg * square_weights
         
         ###################################################
         #              END OF YOUR CODE                   #
@@ -76,6 +105,35 @@ class MLP(object):
         #TODO: Use SGD or SGD with momentum to update     #
         #variables in layers                              #
         ###################################################
+        num_layers = len(self.layers)
+        params  = []
+        grads = []
+        for i in range(len(self.layers)):
+            params += self.layers[i].params
+            grads += self.layers[i].gradients
+
+        for i in range(len(grads)):
+            grads[i] += self.reg * params[i] 
+
+        
+        #for i in range(len(params)):
+        #    params[i] -= learning_rate * grads[i]
+
+        #for i in range(len(params)):
+        #    self.velocity[i] += (self.momentum * self.velocity[i]) + (learning_rate * grads[i])
+        #    params[i] -= self.velocity[i]
+
+        self.adam_count += 1
+        for k in range(len(params)):
+            self.adam_m[k] = (self.adam_beta1 * self.adam_m[k]) + (1-self.adam_beta1) * grads[k]
+            #self.adam_r[k] = np.maximum((self.adam_beta2 * self.adam_r[k]), np.abs(grads[k]))
+            self.adam_r[k] = (self.adam_beta2 * self.adam_r[k]) + (1-self.adam_beta2) * grads[k]**2
+            m_k_hat = self.adam_m[k]/(1-self.adam_beta1**self.adam_count)
+            r_k_hat = self.adam_r[k]/(1-self.adam_beta2**self.adam_count)
+            r_k_hat = np.abs(r_k_hat)
+            #temp = (self.adam_alpha* m_k_hat)/(np.sqrt(r_k_hat) + self.adam_eps)
+            #print(r_k_hat)
+            params[k] -= (self.adam_alpha* m_k_hat)/(np.sqrt(r_k_hat) + self.adam_eps)
 
         
         ###################################################
@@ -103,8 +161,18 @@ class MLP(object):
         #######################################################
         #TODO: Remember to use functions in class SoftmaxLayer#
         #######################################################
+        layer_input = X
 
+        for layer in self.layers:
+            layer_output = layer.feedforward(layer_input)
+            layer_input = layer_output
+
+        layer_output -= np.amax(layer_output, axis=1, keepdims=True)
+        exp_layer_output = np.exp(layer_output)
+        sigma_layer_output = exp_layer_output/ np.sum(exp_layer_output, axis=1, keepdims=True)
+        predictions = np.argmax(sigma_layer_output, axis=1)
         
+
         #######################################################
         #                 END OF YOUR CODE                    #
         #######################################################
