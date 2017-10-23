@@ -140,8 +140,8 @@ def softmax_loss(x, y):
     scores -= np.amax(scores, axis=1, keepdims=True)
     exp_scores = np.exp(scores)
     sigma_scores = exp_scores/ np.sum(exp_scores, axis=1, keepdims=True)
-    req_sigma_scores = sigma_scores[np.arange(num_train), y]
-    loss = np.sum(-np.log(req_sigma_scores))
+    #req_sigma_scores = sigma_scores[np.arange(num_train), y]
+    loss = np.sum(-scores[np.arange(num_train), y] + np.log(np.sum(exp_scores, axis=1)))
     loss /= num_train
 
     #computing the gradient

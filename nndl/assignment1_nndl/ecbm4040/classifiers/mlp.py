@@ -116,13 +116,15 @@ class MLP(object):
             grads[i] += self.reg * params[i] 
 
         
-        #for i in range(len(params)):
-        #    params[i] -= learning_rate * grads[i]
+        for i in range(len(params)):
+            params[i] -= learning_rate * grads[i]
 
         #for i in range(len(params)):
         #    self.velocity[i] += (self.momentum * self.velocity[i]) + (learning_rate * grads[i])
         #    params[i] -= self.velocity[i]
 
+
+        """
         self.adam_count += 1
         for k in range(len(params)):
             self.adam_m[k] = (self.adam_beta1 * self.adam_m[k]) + (1-self.adam_beta1) * grads[k]
@@ -131,11 +133,9 @@ class MLP(object):
             m_k_hat = self.adam_m[k]/(1-self.adam_beta1**self.adam_count)
             r_k_hat = self.adam_r[k]/(1-self.adam_beta2**self.adam_count)
             r_k_hat = np.abs(r_k_hat)
-            #temp = (self.adam_alpha* m_k_hat)/(np.sqrt(r_k_hat) + self.adam_eps)
-            #print(r_k_hat)
             params[k] -= (self.adam_alpha* m_k_hat)/(np.sqrt(r_k_hat) + self.adam_eps)
 
-        
+        """
         ###################################################
         #              END OF YOUR CODE                   #
         ###################################################

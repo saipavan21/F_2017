@@ -100,47 +100,11 @@ class TwoLayerNet(object):
 
         #for k in range(len(params)):
         #    params[k] -= learning_rate * grads[k]
-        #print(len(params))
-        #print(superpo)
-        #for k in range(len(params)):
-        #    self.velocity[k] = (self.momentum * self.velocity[k]) - learning_rate * grads[k]
-        #    params[k] += self.velocity[k]
 
-        #for k in range(len(params)):
-        #    self.velocity[k] = (self.momentum * self.velocity[k]) + learning_rate * grads[k]
-        #    params[k] -= self.velocity[k]
-        #self.velocity = (self.momentum * self.velocity) - learning_rate * grads
-        #params += self.velocity
-
-        
-        self.adam_count += 1
         for k in range(len(params)):
-            self.adam_m[k] = (self.adam_beta1 * self.adam_m[k]) + (1-self.adam_beta1) * grads[k]
-            #self.adam_r[k] = np.maximum((self.adam_beta2 * self.adam_r[k]), np.abs(grads[k]))
-            self.adam_r[k] = (self.adam_beta2 * self.adam_r[k]) + (1-self.adam_beta2) * grads[k]**2
-            m_k_hat = self.adam_m[k]/(1-self.adam_beta1**self.adam_count)
-            r_k_hat = self.adam_r[k]/(1-self.adam_beta2**self.adam_count)
-            r_k_hat = np.abs(r_k_hat)
-            #temp = (self.adam_alpha* m_k_hat)/(np.sqrt(r_k_hat) + self.adam_eps)
-            #print(r_k_hat)
-            params[k] -= (self.adam_alpha* m_k_hat)/(np.sqrt(r_k_hat) + self.adam_eps)
-        
-        #self.adam_m = (self.adam_beta1 * self.adam_m) + (1-self.adam_beta1) * grads
-        #self.adam_r = (self.adam_beta2 * self.adam_r) + (1-self.adam_beta2) * grads * grads
-        #m_k_hat = self.adam_m/(1-self.adam_beta1**iterat)
-        #print(m_k_hat.shape)
-        #print(self.velocity)
-        #print(params.shape)
-        #print(self.layer1.params.shape)
-        #r_k_hat = np.sqrt(self.adam_r/(1-self.adam_beta2**iterat))
-        #print(superpo)
-        #params += (learning_rate* m_k_hat)/(r_k_hat + self.adam_eps)
+            self.velocity[k] = (self.momentum * self.velocity[k]) - learning_rate * grads[k]
+            params[k] += self.velocity[k]
 
-        #print(np.allclose(temp[0], params[0]))
-        #print(superpo)
-        #params -= learning_rate * grads
-
-        #params = np.subtract(params, learning_rate * grads)
 
         
         ###################################################

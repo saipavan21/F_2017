@@ -58,29 +58,13 @@ class BasicClassifier(object):
             #########################################################################
             loss =0.0
             num_completed = 0
-            while num_completed < num_train:
-                start_index = num_completed
-                if num_completed + batch_size < num_train:
-                    end_index = num_completed + batch_size
-                else:
-                    end_index = num_train
-                X_batch = X[start_index: end_index]
-                y_batch = y[start_index: end_index]
-                batch_loss, batch_grad = self.loss(X_batch, y_batch, reg)
-
-                if optim == 'SGD':
-                    self.W -= learning_rate * batch_grad
-                else:
-                    self.velocity = (momentum * self.velocity) + learning_rate * batch_grad
-                    self.W -= self.velocity
-
-
-                loss = batch_loss
-
-                num_completed += batch_size
-
+            idx = np.random.randint(num_train, size= batch_size)
+            X_batch = X[idx,:]
+            y_batch = y[idx]
+            loss, grad = self.loss(X_batch, y_batch, reg)
             loss_history.append(loss)
-            
+            self.W -= learning_rate * grad
+
             #########################################################################
             # TODO:                                                                 #
             # Update the weights using the gradient and the learning rate.          #
