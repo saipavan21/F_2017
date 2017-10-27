@@ -147,7 +147,7 @@ class ImageGenerator(object):
         """
         # TODO: Implement the rotate function. Remember to record the value of
         # rotation degree.
-        raise NotImplementedError
+        #raise NotImplementedError
         #######################################################################
         #                                                                     #
         #                                                                     #
@@ -155,6 +155,10 @@ class ImageGenerator(object):
         #                                                                     #
         #                                                                     #
         #######################################################################
+        self.deg_rot = angle
+        x = self.x
+        x = rotate(x, angle, axes=(1,2))
+        self.x = x
 
     def flip(self, mode='h'):
         """
@@ -163,7 +167,7 @@ class ImageGenerator(object):
         """
         # TODO: Implement the flip function. Remember to record the boolean values is_horizontal_flip and
         # is_vertical_flip.
-        raise NotImplementedError
+        #raise NotImplementedError
         #######################################################################
         #                                                                     #
         #                                                                     #
@@ -171,6 +175,20 @@ class ImageGenerator(object):
         #                                                                     #
         #                                                                     #
         #######################################################################
+        x = self.x
+        if mode == 'h':
+            self.is_horizontal_flip = True
+            x = np.flip(x, axis=2)
+        elif mode == 'v':
+            self.is_vertical_flip = True
+            x = np.flip(x, axis=1)
+        else:
+            self.is_vertical_flip = True
+            self.is_horizontal_flip = True
+            x = np.flip(x, axis=1)
+            x = np.flip(x, axis=2)
+
+        self.x = x
 
     def add_noise(self, portion, amplitude):
         """
@@ -182,7 +200,7 @@ class ImageGenerator(object):
         # TODO: Implement the add_noise function. Remember to record the
         # boolean value is_add_noise. You can try uniform noise or Gaussian
         # noise or others ones that you think appropriate.
-        raise NotImplementedError
+        #raise NotImplementedError
         #######################################################################
         #                                                                     #
         #                                                                     #
@@ -190,3 +208,16 @@ class ImageGenerator(object):
         #                                                                     #
         #                                                                     #
         #######################################################################
+        self.is_add_noise = True
+        x = self.x.astype(float)
+        noise_sample = int(x.shape[0] * portion)
+        rand_ind = np.random.choice(x.shape[0], size=noise_sample, replace=False)
+        mean = 0
+        std = 0.1**0.5
+        #uni_noise = np.random.uniform(0,1, (noise_sample, self.height, self.width, self.channels))
+        #uni_noise = uni_noise * amplitude
+        #x[rand_ind] = x[rand_ind] + uni_noise
+        gauss_noise = np.random.normal(mean, std, (noise_sample, self.height, self.width, self.channels))
+        gauss_noise = gauss_noise * amplitude
+        x[rand_ind] = x[rand_ind] + gauss_noise
+        self.x = x
