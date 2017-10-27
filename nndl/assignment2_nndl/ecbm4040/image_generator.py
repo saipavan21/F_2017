@@ -20,7 +20,7 @@ class ImageGenerator(object):
         # x, y, num_of_samples, height, width, number of pixels translated, degree of rotation, is_horizontal_flip,
         # is_vertical_flip, is_add_noise. By default, set boolean values to
         # False.
-        raise NotImplementedError
+        #raise NotImplementedError
         #######################################################################
         #                                                                     #
         #                                                                     #
@@ -28,6 +28,16 @@ class ImageGenerator(object):
         #                                                                     #
         #                                                                     #
         #######################################################################
+        self.x =x
+        self.y = y
+        self.num_of_samples = x.shape[0]
+        self.height = x.shape[1]
+        self.width = x.shape[2]
+        self.channels = x.shape[3]
+        self.num_pix_trans = {"height":0, "width":0}
+        self.deg_rot = None 
+        self.is_horizontal_flip, self.is_vertical_flip, self.is_add_noise = False, False, False
+
 
     def next_batch_gen(self, batch_size, shuffle=True):
         """
@@ -53,7 +63,7 @@ class ImageGenerator(object):
         #       else:
         #           shuffle(x)
         #           reset batch_count
-        raise NotImplementedError
+        #raise NotImplementedError
         #######################################################################
         #                                                                     #
         #                                                                     #
@@ -61,12 +71,28 @@ class ImageGenerator(object):
         #                                                                     #
         #                                                                     #
         #######################################################################
+        num_of_samples = self.num_of_samples
+        total_batches = int(num_of_samples/batch_size)
+        batch_count = 0
+        x = self.x
+        y = self.y
+        while True:
+            if batch_count < total_batches:
+                batch_count += 1
+                start_index = (batch_count -1) * batch_size
+                end_index = start_index + batch_size
+                yield x[start_index:end_index], y[start_index:end_index]
+            else:
+                x = np.random.shuffle(self.x)
+                batch_count = 0
+
+
 
     def show(self):
         """
         Plot the top 16 images (index 0~15) of self.x for visualization.
         """
-        raise NotImplementedError
+        #raise NotImplementedError
         #######################################################################
         #                                                                     #
         #                                                                     #
@@ -74,6 +100,13 @@ class ImageGenerator(object):
         #                                                                     #
         #                                                                     #
         #######################################################################
+        x_batch = self.x[:16]
+        r = 4
+        f, axarr = plt.subplots(r, r, figsize=(8,8))
+        for i in range(r):
+            for j in range(r):
+                img = x_batch[r*i+j]
+                axarr[i][j].imshow(img)
 
     def translate(self, shift_height, shift_width):
         """
@@ -89,7 +122,7 @@ class ImageGenerator(object):
         # right edge of the picture.
         # Hint: Numpy.roll
         # (https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.roll.html)
-        raise NotImplementedError
+        #raise NotImplementedError
         #######################################################################
         #                                                                     #
         #                                                                     #
@@ -97,6 +130,13 @@ class ImageGenerator(object):
         #                                                                     #
         #                                                                     #
         #######################################################################
+        shift_array = [0, shift_height, shift_width, 0]
+        self. num_pix_trans["height"] += shift_height
+        self. num_pix_trans["width"] += shift_width
+        x = self.x
+        x_trans = np.roll(np.roll(np.roll(np.roll(x, shift_array[0], axis=0), shift_array[1], axis=1), shift_array[2], axis=2), shift_array[3], axis=3)
+        self.x = x_trans
+
 
     def rotate(self, angle=0.0):
         """
