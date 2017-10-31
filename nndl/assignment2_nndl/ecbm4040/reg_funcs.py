@@ -116,14 +116,15 @@ def bn_forward(x, gamma, beta, bn_params, mode):
         out = gamma * ((x-mean)/np.sqrt(var + eps)) + beta
         moving_mean = decay * moving_mean + (1-decay) * mean
         moving_var = decay * moving_var + (1-decay) * var
+
         #raise NotImplementedError
     elif mode == 'test':
         #######################################################################
         # TODO: Batch normalization forward test mode                         #
         #######################################################################
-        mean = np.mean(x, axis=0)
-        var = np.var(x, axis=0)
         out = gamma * ((x-moving_mean)/np.sqrt(moving_var + eps)) + beta
+        mean = moving_mean
+        var = moving_var
         #raise NotImplementedError
 
     # cache for back-propagation

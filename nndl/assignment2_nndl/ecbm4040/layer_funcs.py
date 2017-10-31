@@ -151,7 +151,30 @@ def conv2d_forward(x, w, b, pad, stride):
     #                                                                     #
     #                                                                     #
     #######################################################################
-    raise NotImplementedError
+    #raise NotImplementedError
+    batch, height, width, channels = x.shape
+    num_filters, filter_height, filter_width, channels = w.shape
+    new_height = ((height-filter_height +2*pad)/stride) +1
+    new_width = ((width-filter_width +2*pad)/stride) +1
+    out = np.random.randn(batch,int(new_height), int(new_width), num_filters)
+    x_pad = np.lib.pad(x, ((0,0),(pad,pad),(pad,pad),(0,0)), 'constant', constant_values=0)
+    w_reshape = np.reshape(w, (num_filters, -1))
+    i = 0
+    j =0
+    while i+filter_height < height+2*pad:
+        while j+filter_width < width+2*pad:
+            x_patch = x_pad[:,i:i+filter_height,j:j+filter_width, :]
+            x_patch = np.reshape(x_patch, (batch, -1))
+            out_patch = x_patch.dot(w_reshape.T) + b
+            out[:,i,j,:] = out_patch
+
+            j += stride
+        i += stride
+
+    return out
+
+
+
 
 
 def conv2d_backward(d_top, x, w, b, pad, stride):
@@ -184,5 +207,15 @@ def conv2d_backward(d_top, x, w, b, pad, stride):
     #                                                                     #
     #                                                                     #
     #######################################################################
-    raise NotImplementedError
+    #raise NotImplementedError
+    x_pad = np.lib.pad(x, ((0,0),(pad,pad),(pad,pad),(0,0)), 'constant', constant_values=0)
+    
+
+
+
+    batch, height_new, width_new, num_of_filters = d_top.shape
+    d_top_reshape = np.transpose(d_top, (3,0,1,2))
+    d_top_reshape = np.reshape(d_top_reshape, (num_of_filters, -1))
+    d_b = np.mean(d_top_reshape, axis=1)
+
 
