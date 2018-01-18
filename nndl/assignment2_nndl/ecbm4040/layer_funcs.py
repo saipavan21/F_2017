@@ -154,22 +154,32 @@ def conv2d_forward(x, w, b, pad, stride):
     #raise NotImplementedError
     batch, height, width, channels = x.shape
     num_filters, filter_height, filter_width, channels = w.shape
-    new_height = ((height-filter_height +2*pad)/stride) +1
-    new_width = ((width-filter_width +2*pad)/stride) +1
+    new_height = int(((height-filter_height +2*pad)/stride) +1)
+    new_width = int(((width-filter_width +2*pad)/stride) +1)
     out = np.random.randn(batch,int(new_height), int(new_width), num_filters)
     x_pad = np.lib.pad(x, ((0,0),(pad,pad),(pad,pad),(0,0)), 'constant', constant_values=0)
     w_reshape = np.reshape(w, (num_filters, -1))
-    i = 0
-    j =0
-    while i+filter_height < height+2*pad:
-        while j+filter_width < width+2*pad:
-            x_patch = x_pad[:,i:i+filter_height,j:j+filter_width, :]
-            x_patch = np.reshape(x_patch, (batch, -1))
-            out_patch = x_patch.dot(w_reshape.T) + b
-            out[:,i,j,:] = out_patch
 
-            j += stride
-        i += stride
+
+    for i in range(batch):
+        for j in range(num_filters):
+            for k in range(new_height):
+                height_stride = k*stride
+                for l in range(new_width):
+                    width_stride = l*stride
+                    x_patch = x_pad[i, height_stride:height_stride+filter_height, width_stride:width_stride+filter_width,:]
+                    out[i,k,l,j] = np.sum(w[j] * x_patch) + b[j]
+
+
+    # while i+filter_height < height+2*pad:
+    #     while j+filter_width < width+2*pad:
+    #         x_patch = x_pad[:,i:i+filter_height,j:j+filter_width, :]
+    #         x_patch = np.reshape(x_patch, (batch, -1))
+    #         out_patch = x_patch.dot(w_reshape.T) + b
+    #         out[:,i,j,:] = out_patch
+
+    #         j += stride
+    #     i += stride
 
     return out
 
@@ -208,14 +218,30 @@ def conv2d_backward(d_top, x, w, b, pad, stride):
     #                                                                     #
     #######################################################################
     #raise NotImplementedError
-    x_pad = np.lib.pad(x, ((0,0),(pad,pad),(pad,pad),(0,0)), 'constant', constant_values=0)
+
+    batch, height, width, num_channels = x.shape
+    num_of_filters, filter_height, filter_width, num_channels = w.shape
+
+    new_height = int(((height - filter_height + 2 * pad) // stride) + 1)
+    new_width = int(((width - filter_width + 2 * pad) // stride) + 1)
+
+
+    out=np.zeros((batch,new_height,new_width,num_of_filters))
+    d_w=np.zeros((num_of_filters,filter_height,filter_width,num_channels))
+    d_b=np.zeros((num_of_filters))
+    x_patch = np.pad(x,((0,),(pad,),(pad,),(0,)),'constant')
+    
+    for filt in range(num_of_filters):
+        d_b[filt] = np.sum(d_top[:,:,:,filt])
+
+    for filt in range(num_of_filters):
+        for chann in range(num_channels):
+            for heig in range(filter_height):
+                for wid in range(filter_width):
+                    padded_x_subset = x_patch[:,heig:heig+new_height*stride:stride,wid:wid+new_width*stride:stride,chann]
+                    d_w[filt,heig,wid,chann] = np.sum(d_top[:, :, :,filt]*padded_x_subset)
     
 
-
-
-    batch, height_new, width_new, num_of_filters = d_top.shape
-    d_top_reshape = np.transpose(d_top, (3,0,1,2))
-    d_top_reshape = np.reshape(d_top_reshape, (num_of_filters, -1))
-    d_b = np.mean(d_top_reshape, axis=1)
+    return d_w, d_b
 
 

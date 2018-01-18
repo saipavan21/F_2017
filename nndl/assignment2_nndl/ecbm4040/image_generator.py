@@ -83,7 +83,7 @@ class ImageGenerator(object):
                 end_index = start_index + batch_size
                 yield x[start_index:end_index], y[start_index:end_index]
             else:
-                x = np.random.shuffle(self.x)
+                x, y = np.random.shuffle(self.x, self.y)
                 batch_count = 0
 
 
